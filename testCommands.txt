@@ -1,0 +1,27 @@
+
+
+./run-xml-validator.sh -f ./src/test/Employee.xsd ./src/test/GoodEmployeeRequest.xml -o reports
+
+./run-xml-validator.sh ./src/test/Employee.xsd ./src/test/BadEmployee.xml -o reports
+
+Run against simple well-formed xml file
+  ./run-xml-validator.sh -f ./src/test/Employee.xsd ./src/test/WellFormed.xml -o reports
+
+Run against simple  not well-formed xml file
+  ./run-xml-validator.sh -f ./src/test/Employee.xsd ./src/test/NotWellFormed.xml -o reports
+
+Run against file with two errors against xsd
+  ./run-xml-validator.sh -f ./src/test/Employee.xsd ./src/test/EmployeeRequestTwoErrors.xml -o reports
+ 
+   
+Check bad EPCIS verison i.e. not 1 or 2
+  ./run-xml-validator.sh -f epcis ./src/test/BadEPCISVersion.xml -o reports
+ 
+Run against simplest EPCIS file to see it pick up correct version. File is from me.
+  ./run-xml-validator.sh -d epcis ./src/test/SimplestEPCISFile.xml -o reports
+  
+ Run against real EPCIS file
+  ./run-xml-validator.sh -d epcis ./src/test/epcis/Scenario_Test_03-1.2.xml -o reports
+
+
+
