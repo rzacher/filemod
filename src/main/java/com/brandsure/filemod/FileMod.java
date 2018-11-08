@@ -157,11 +157,12 @@ public class FileMod {
         //logger.debug("Log4j appender configuration is successful !!");
     }
 
-    public static final void prettyPrint(Document xml) throws Exception {
+    public  final void prettyPrint(Document xml) throws Exception {
         Transformer tf = TransformerFactory.newInstance().newTransformer();
         tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         tf.setOutputProperty(OutputKeys.INDENT, "yes"); 
-        Result dest = new StreamResult(new File("xmlFileName.xml"));
+        String newFilename = xmlFile + "-fixed"; 
+        Result dest = new StreamResult(new File(newFilename));
         tf.transform(new DOMSource(xml), dest);
         //System.out.println(out.toString());
     }
