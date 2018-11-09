@@ -32,6 +32,7 @@ import org.xml.sax.InputSource;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
@@ -104,13 +105,24 @@ public class FileMod {
          affirmTransactionStatement.appendChild(text);
          dscsaTransactionStatement.appendChild(affirmTransactionStatement);
          
+         // Add xmlns:gs1ushc="http://epcis.gs1us.org/hc/ns" if missing
+         NamedNodeMap rootAttributesMap =  doc.getDocumentElement().getAttributes(); 
+         if (rootAttributesMap == null) {
+        	 logger.error("rootAttributesMap == null"); 
+         } else {
+        	 if (rootAttributesMap.getNamedItem("xmlns:gs1ushc") == null) {
+        	   logger.error("Root is missing attribute xmlns:gs1ushc");
+        	   doc.getDocumentElement().setAttribute("xmlns:gs1ushc", "http://epcis.gs1us.org/hc/ns");
+             } 
+         }
+         
          // retrieve the element we want to remove
-	        NodeList testNameElements  = doc.getElementsByTagName("gwc:TestName");
-	   System.out.println("length=" + testNameElements.getLength());
+	     NodeList testNameElements  = doc.getElementsByTagName("gwc:TestName");
+	    // System.out.println("length=" + testNameElements.getLength());
 	        for (int i=testNameElements.getLength()-1; i>-1; i--) {
 	        	// remove the specific node
 	        	Element element = (Element) testNameElements.item(i); 
-	        	System.out.println(element);
+	        	logger.info("Moving element " + element);
 	        	Node parent = element.getParentNode();
 	        	parent.removeChild(element);
 	        	parent.appendChild(element); 
@@ -121,6 +133,7 @@ public class FileMod {
 	        	// remove the specific node
 	        	Element element = (Element) exResElements.item(j); 
 	        	Node parent = element.getParentNode();
+	        	logger.info("Moving element " + element);
 	        	parent.removeChild(element);
 	        	parent.appendChild(element);
 	        }
