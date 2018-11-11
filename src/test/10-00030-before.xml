@@ -3,8 +3,8 @@
   <EPCISHeader>
       <gwc:TestName>header tests</gwc:TestName>
  <gwc:TestName>header tests 2</gwc:TestName> 
-      <gwc:ExRes>7335-FAIL-affirmTransactionStatement invalid value - should be either true or false</gwc:ExRes>
-    <gwc:ExRes>7336-FAIL-affirmTransactionStatement invalid value - should be either true or false</gwc:ExRes>
+      <gwc:ExRes>7335-FAIL-affirmTransactionStatement invalid value - should be either true or false</gwc:ExRes><!-- case 1 -->
+    <gwc:ExRes>7336-FAIL-affirmTransactionStatement invalid value - should be either true or false</gwc:ExRes><!-- case 2 -->
     <sbdh:StandardBusinessDocumentHeader>
       <sbdh:HeaderVersion>1.0</sbdh:HeaderVersion>
       <sbdh:Sender>

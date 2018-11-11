@@ -28,8 +28,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException; 
 import org.xml.sax.ErrorHandler; 
-import org.xml.sax.InputSource; 
-
+import org.xml.sax.InputSource;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -129,13 +129,29 @@ public class FileMod {
 	        }
 	        
 	        NodeList exResElements = doc.getElementsByTagName("gwc:ExRes");
+	        LinkedList<Node> nodesToMove = new LinkedList<Node>();
+	        Node parent = null; 
 	        for (int j=exResElements.getLength()-1; j>-1; j--) {
 	        	// remove the specific node
-	        	Element element = (Element) exResElements.item(j); 
-	        	Node parent = element.getParentNode();
+	        	Element element = (Element) exResElements.item(j);
+	        	if (parent == null) {
+	        	  parent = element.getParentNode();
+	        	}
+	        	// Get the nextNode in case its a comment
+	        	Node nextNode = element.getNextSibling();
 	        	logger.info("Moving element " + element);
 	        	parent.removeChild(element);
-	        	parent.appendChild(element);
+                nodesToMove.addFirst(element); 
+	        	// If the nextNode is a comment, lets keep them together
+	        	if ((nextNode != null) && (nextNode instanceof Comment)) {
+	        	   parent.removeChild(nextNode);
+	        	   //parent.appendChild(nextNode);
+	        	   nodesToMove.addFirst(nextNode);
+	        	}   	
+ 	        }
+	        // Now put the nodes back at the bottom
+	        for (Node node: nodesToMove) {
+	        	parent.appendChild(node);
 	        }
 	        
 	        // Remove whitespace
