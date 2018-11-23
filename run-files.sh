@@ -1,8 +1,9 @@
 #!/bin/bash
 #FILES=/path/to/*
-FILES=`find /home/bob/Eng/brandsure/test -name \*.xml `
-#FILES=~/Eng/brandsure/10.Commission/*.xml
-
+#FILES=`find /home/bob/Eng/brandsure/test -name \*.xml `
+FILES=`find /home/bob/Eng/brandsure/test-files -name \*\*\1\*.xml `
+# For testing one file at a time
+#FILES=`find /home/bob/Eng/brandsure/test-files -name \*\*\10-10008.xml `
 
 for f in $FILES
 do

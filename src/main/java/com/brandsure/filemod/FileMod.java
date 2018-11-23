@@ -97,13 +97,17 @@ public class FileMod {
          <gs1ushc:affirmTransactionStatement>true</gs1ushc:affirmTransactionStatement>
          </gs1ushc:dscsaTransactionStatement>
          **/
-         Node dscsaTransactionStatement= doc.createElement("gs1ushc:dscsaTransactionStatement");
-         Element epcisHeader = (Element) doc.getElementsByTagName("EPCISHeader").item(0);
-         epcisHeader.appendChild(dscsaTransactionStatement);
-         Node affirmTransactionStatement = doc.createElement("gs1ushc:affirmTransactionStatement");
-         Text text = doc.createTextNode("true");
-         affirmTransactionStatement.appendChild(text);
-         dscsaTransactionStatement.appendChild(affirmTransactionStatement);
+         // if the gs1ushc:affirmTransactionStatement doesn't exist, we need to add it. 
+         NodeList affirmTransList = doc.getElementsByTagName("gs1ushc:affirmTransactionStatement");
+         if ((affirmTransList == null) || (affirmTransList.getLength() == 0)){
+	         Node dscsaTransactionStatement= doc.createElement("gs1ushc:dscsaTransactionStatement");
+	         Element epcisHeader = (Element) doc.getElementsByTagName("EPCISHeader").item(0);
+	         epcisHeader.appendChild(dscsaTransactionStatement);
+	         Node affirmTransactionStatement = doc.createElement("gs1ushc:affirmTransactionStatement");
+	         Text text = doc.createTextNode("true");
+	         affirmTransactionStatement.appendChild(text);
+	         dscsaTransactionStatement.appendChild(affirmTransactionStatement);
+         }
          
          // Add xmlns:gs1ushc="http://epcis.gs1us.org/hc/ns" if missing
          NamedNodeMap rootAttributesMap =  doc.getDocumentElement().getAttributes(); 
@@ -111,7 +115,7 @@ public class FileMod {
         	 logger.error("rootAttributesMap == null"); 
          } else {
         	 if (rootAttributesMap.getNamedItem("xmlns:gs1ushc") == null) {
-        	   logger.error("Root is missing attribute xmlns:gs1ushc");
+        	   logger.info("Root is missing attribute xmlns:gs1ushc - adding attribute");
         	   doc.getDocumentElement().setAttribute("xmlns:gs1ushc", "http://epcis.gs1us.org/hc/ns");
              } 
          }
@@ -122,7 +126,7 @@ public class FileMod {
 	        for (int i=testNameElements.getLength()-1; i>-1; i--) {
 	        	// remove the specific node
 	        	Element element = (Element) testNameElements.item(i); 
-	        	logger.info("Moving element " + element);
+	        	//logger.info("Moving element " + element);
 	        	Node parent = element.getParentNode();
 	        	parent.removeChild(element);
 	        	parent.appendChild(element); 
@@ -137,17 +141,27 @@ public class FileMod {
 	        	if (parent == null) {
 	        	  parent = element.getParentNode();
 	        	}
-	        	// Get the nextNode in case its a comment
-	        	Node nextNode = element.getNextSibling();
-	        	logger.info("Moving element " + element);
+	        	// Get the nextNode and nextNextNode in case one is  a comment. 
+	        	// so far it's the nextNodeNode that is the comment
+	        	Node nextNode = element.getNextSibling(); 
+	        	Node nextNextNode = nextNode.getNextSibling();
+	        	//logger.info("Moving element " + element);
 	        	parent.removeChild(element);
                 nodesToMove.addFirst(element); 
+                // TODO - the following two sections could be moved to a function
 	        	// If the nextNode is a comment, lets keep them together
-	        	if ((nextNode != null) && (nextNode instanceof Comment)) {
-	        	   parent.removeChild(nextNode);
-	        	   //parent.appendChild(nextNode);
-	        	   nodesToMove.addFirst(nextNode);
-	        	}   	
+	        	if ((nextNode != null) && (nextNode.getNodeType() == Node.COMMENT_NODE)) {
+	        	   logger.debug("moving comment " + nextNode.getNodeType() + "  " + nextNode.getNodeName() +
+	        			   " " + nextNode.getTextContent()); 
+	        	   Node uncoupledNextNode = parent.removeChild(nextNextNode);
+	        	   nodesToMove.addFirst(uncoupledNextNode);
+	        	}  // Usually nextNextNode
+	        	if ((nextNextNode != null) && (nextNextNode.getNodeType() == Node.COMMENT_NODE)) {
+	        	   logger.debug("moving comment nextnextNode " + nextNextNode.getNodeName() +
+	        	     " " + nextNextNode.getTextContent()); 
+	        	   Node uncoupledNextNode = parent.removeChild(nextNextNode);
+	        	   nodesToMove.addFirst(uncoupledNextNode);
+	        	}	
  	        }
 	        // Now put the nodes back at the bottom
 	        for (Node node: nodesToMove) {
@@ -190,6 +204,8 @@ public class FileMod {
         Transformer tf = TransformerFactory.newInstance().newTransformer();
         tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
         tf.setOutputProperty(OutputKeys.INDENT, "yes"); 
+        tf.setOutputProperty(OutputKeys.STANDALONE, "yes");
+        tf.setOutputProperty("http://www.oracle.com/xml/is-standalone", "yes");
         String newFilename = xmlFile + "-fixed"; 
         Result dest = new StreamResult(new File(newFilename));
         tf.transform(new DOMSource(xml), dest);
